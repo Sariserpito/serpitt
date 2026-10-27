@@ -25,15 +25,24 @@
   // GoatCounter site code (the "xyz" in xyz.goatcounter.com); empty: nothing is counted.
   const GOATCOUNTER = "serpitt";
 
+  // Android: their apps (Chrome kept these https links in the browser); not installed, the web page.
+  const APPS = { youtube: "com.google.android.youtube", bandcamp: "com.bandcamp.android" };
+  const appUrl = (id, url) => {
+    if (!APPS[id] || !/Android/i.test(navigator.userAgent)) return url;
+    const u = new URL(url);
+    return "intent://" + u.host + u.pathname + u.search + "#Intent;scheme=https;package=" + APPS[id] +
+      ";S.browser_fallback_url=" + encodeURIComponent(url) + ";end";
+  };
+
   const q = new URLSearchParams(location.search);
   const id = q.get("to");
-  const target = TARGETS[id];
+  const target = TARGETS[id] && appUrl(id, TARGETS[id]);
   let gone = false;
   const go = () => { if (!gone) { gone = true; location.replace(target); } };
   if (!target) {
     document.getElementById("msg").innerHTML = '<a href="../">Serpitt</a>';
   } else {
-    document.getElementById("msg").innerHTML = '<a href="' + target + '">' + target + "</a>";
+    document.getElementById("msg").innerHTML = '<a href="' + target + '">' + TARGETS[id] + "</a>";
     if (GOATCOUNTER) {
       const ref = [q.get("utm_source"), q.get("utm_campaign")].filter(Boolean).join("/");
       const pixel = new Image();

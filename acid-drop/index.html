@@ -54,12 +54,21 @@
   // GoatCounter site code (the "xyz" in xyz.goatcounter.com); empty: nothing is counted.
   const GOATCOUNTER = "serpitt";
 
+  // Android: their apps (Chrome kept these https links in the browser); not installed, the web page.
+  const APPS = { youtube: "com.google.android.youtube", bandcamp: "com.bandcamp.android" };
+  const appUrl = (id, url) => {
+    if (!APPS[id] || !/Android/i.test(navigator.userAgent)) return url;
+    const u = new URL(url);
+    return "intent://" + u.host + u.pathname + u.search + "#Intent;scheme=https;package=" + APPS[id] +
+      ";S.browser_fallback_url=" + encodeURIComponent(url) + ";end";
+  };
+
   const list = document.getElementById("services");
   for (const [id, name, url] of SERVICES) {
     if (!url) continue;
     const a = document.createElement("a");
     a.className = "service";
-    a.href = url;
+    a.href = appUrl(id, url);
     a.rel = "noopener";
     // Counted as an event per platform; the page view itself carries utm_source (the app sends "pittplayer").
     a.dataset.goatcounterClick = "acid-drop/" + id;
